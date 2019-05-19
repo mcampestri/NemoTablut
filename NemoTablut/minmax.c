@@ -41,9 +41,9 @@ int alphaBetaMax(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
 
     // TODO: condizione reinserita (controllare)
     //trovato un exact value con depthLeft >
-    //if(entry.type == PV_NODE && entry.deepLeft >= depthLeft) {
-    //	return score;
-    //}
+    if(entry.type == PV_NODE && entry.deepLeft >= depthLeft) {
+    	return score;
+    }
 
     ////trovato un cut value con depthLeft>
     if(entry.type == CUT_NODE && entry.deepLeft >= depthLeft)
@@ -196,9 +196,9 @@ int alphaBetaMin(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
 
     // TODO: condizione reinserita (controllare)
     //trovato un exact value con depthLeft>
-    //if(entry.type == PV_NODE && entry.deepLeft >= depthLeft) {
-    //    return score;
-    //}
+    if(entry.type == PV_NODE && entry.deepLeft >= depthLeft) {
+        return score;
+    }
 
     ////trovato un cut value con depthLeft>
     if(entry.type == CUT_NODE && entry.deepLeft >= depthLeft)
