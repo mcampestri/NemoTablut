@@ -14,77 +14,8 @@
 #include "abdada.h"
 #include "client.h"
 
-
-
-
-//--------------------------------------MAIN PER TESTARE---------------------------------
-
-
-int ciao() {
-    int maxTime = 15;
-    int numThreads = 2;
-
-    BoardState initialBoard;
-	initBoard(&initialBoard);
-
-	printf("%d\n", isEqual(initialBoard, initialBoard));
-
-    int turn = 1;
-	int end = 0;
-
-	initTables();
-	initMoveTable();
-
-	HistoryArray historyArray;
-	initHistoryArray(&historyArray);
-	
-	while(!end) {
-	    printf("TURNO: %d\n", turn);
-
-		iterativeDeepeningSearchWhite(initialBoard, 7, historyArray, maxTime, numThreads);
-		Move bestMove = getFinalBestMoveWhite();
-
-		printf("Best move: ");
-		printMove(bestMove);
-		printf("\n");
-		initialBoard = moveWhite(initialBoard, bestMove);
-
-		printBoard(initialBoard);
-
-		addPlayedBoard(&historyArray, initialBoard);
-
-		sleep(1);
-
-		end = isWhiteWin(initialBoard);
-		if(end) {
-		    printf("\n\nWHITE WINS\n\n");
-		}
-
-
-		if(!end) {
-            Move blackMoves[MAX_MOVES];
-            int movesNumber = getPossibleMovesBlack(initialBoard, blackMoves);
-            int random = (133 % turn % movesNumber);
-            initialBoard = moveBlack(initialBoard, blackMoves[random]);
-
-            printf("\nMOSSA BLACK: \n");
-            printBoard(initialBoard);
-            printf("\n---------------------------------------------------\n");
-
-            end = evaluateForBlack(initialBoard) == BLACK_WIN;
-            if(end) {
-                printf("\n\nBLACK WINS\n\n");
-            }
-
-            addPlayedBoard(&historyArray, initialBoard);
-        }
-		turn++;
-	}
-
-	return 0;
-}
-
-
+#define TIME 55
+#define THREADS 2
 
 // argv[1] : colore giocatore
 // argv[2] : valore timeout (a questo verranno sottratti 5 secondi di margine)
@@ -92,6 +23,11 @@ int ciao() {
 int main(int argc, char* argv[]) {
     int playerColor, maxTime, numThreads;
     int i;
+
+	if (argc < 2){
+		printf("Errore nel numero di argomenti\n");
+		exit(1);
+	}
 
     for(i = 0; i < strlen(argv[1]); i++) {
         argv[1][i] = tolower(argv[1][i]);
@@ -105,11 +41,22 @@ int main(int argc, char* argv[]) {
     else
         playerColor = WHITE;
 
+	if(argc == 2){
+		maxTime = TIME;
+		numThreads = THREADS;
+	} else {
+		if (argc == 3){
+			maxTime = atoi(argv[2]) - 5;   // 5 secondi di margine rispetto al timeout
+			numThreads = THREADS;
+		} else {
+			if (argc == 4){
+				maxTime = atoi(argv[2]) - 5;   // 5 secondi di margine rispetto al timeout
+				numThreads = atoi(argv[3]);
+			}
+		}
+	}
 
-    maxTime = atoi(argv[2]) - 5;        // 5 secondi di margine rispetto al timeout
-    printf("Max time: %d\n", maxTime);
-
-    numThreads = atoi(argv[3]);
+	printf("Max time: %d\n", maxTime);
     printf("Num threads: %d\n\n", numThreads);
 
     gameLoop(playerColor, maxTime, numThreads);
