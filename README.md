@@ -10,7 +10,7 @@ gcc ./NemoTablut/*.c -o Nemo -mcmodel=medium -O3 -pthread -w
 
 Esecuzione:
 
-./Nemo <colore>
+./Nemo colore
 
 Accetta altri due argomenti per l'esecuzione, nell'ordine:
 
