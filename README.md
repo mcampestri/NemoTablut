@@ -1,11 +1,11 @@
 # NemoTablut
 
-Compilazione:
-cd NemoTablut-master
-gcc ./NemoTablut/*.c -o Nemo -mcmodel=medium -O3 -pthread -w
+Compilazione:\n
+cd NemoTablut-master\n
+gcc ./NemoTablut/*.c -o Nemo -mcmodel=medium -O3 -pthread -w\n
 
-Esecuzione:
-./Nemo <colore>
-Accetta altri due argomenti per l'esecuzione, nell'ordine:
-  - Numero di secondi del timer (default: 60 secondi)
-  - Numero di thread (default: 2)
+Esecuzione:\n
+./Nemo <colore>\n
+Accetta altri due argomenti per l'esecuzione, nell'ordine:\n
+  - Numero di secondi del timer (default: 60 secondi)\n
+  - Numero di thread (default: 2)\n
