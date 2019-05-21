@@ -15,7 +15,7 @@ int alphaBetaMax(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
     int movesNumber = 0;
     Move movesArr[MAX_MOVES];
 
-    alpha = ALPHA_MIN;
+    int maxScore = ALPHA_MIN;
 
 
     if (isDraw(&historyArray, board)) {
@@ -39,17 +39,22 @@ int alphaBetaMax(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
     // Il lock è fatto nella funzione getWhiteTransposition
     Entry entry = getWhiteTrasposition(&board, &bestMove, &score);
 
+    int entryValid = (entry.type != -1) &&
+					 ((GET_CELL_STATE(board.Board, START_ROW(bestMove), START_COLUMN(bestMove))) == WHITE || (GET_CELL_STATE(board.Board, START_ROW(bestMove), START_COLUMN(bestMove))) == WHITE_KING) &&
+					 ((GET_CELL_STATE(board.Board, TARGET_ROW(bestMove), TARGET_COLUMN(bestMove))) == EMPTY);
+
+    
     // TODO: condizione reinserita (controllare)
     //trovato un exact value con depthLeft >
-    if(entry.type == PV_NODE && entry.deepLeft >= depthLeft) {
+    if(entryValid && entry.type == PV_NODE && entry.deepLeft >= depthLeft) {
     	return score;
     }
 
     ////trovato un cut value con depthLeft>
-    if(entry.type == CUT_NODE && entry.deepLeft >= depthLeft)
-        alpha = score;
+    if(entryValid && entry.type == CUT_NODE && entry.deepLeft >= depthLeft)
+        maxScore = score;
     //controllo se tagliare
-    if (alpha >= beta)
+    if (maxScore >= beta)
         return beta;
 
 
@@ -61,7 +66,7 @@ int alphaBetaMax(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
 
     movesNumber = getPossibleMovesWhite(board, movesArr);
 
-    if (entry.type != -1) {    // Put first
+    if (entryValid && entry.type != -1) {    // Put first
         for (i = 0; i < movesNumber; i++) {
             if (movesArr[i] == bestMove) {
                 movesArr[i] = movesArr[0];
@@ -71,7 +76,7 @@ int alphaBetaMax(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
     }
 
     if (depthLeft > 1) {
-        if (entry.type != -1)
+        if (entryValid && entry.type != -1)
             sortMovesArrayWhite(&board, &(movesArr[1]), movesNumber - 1);
         else
             sortMovesArrayWhite(&board, movesArr, movesNumber);
@@ -91,7 +96,13 @@ int alphaBetaMax(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
         }
 
         nextBoard = moveWhite(board, currentMove);
+        
         score = alphaBetaMin(nextBoard, alpha, beta, depthLeft - 1, historyArray);
+
+        if(score > maxScore) {
+        	maxScore = score;
+        	bestMove = currentMove;
+        }
 
         if (alpha < score) {
             alpha = score;
@@ -105,9 +116,9 @@ int alphaBetaMax(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
             }
             lockTranspositionEntryWhite(boardHash);
             if (alpha == WHITE_WIN)
-                addWhiteEntry(&board, currentMove, alpha, depthLeft, PV_NODE);
+                addWhiteEntry(&board, currentMove, maxScore, depthLeft, PV_NODE);
             else
-                addWhiteEntry(&board, currentMove, alpha, depthLeft, CUT_NODE);
+                addWhiteEntry(&board, currentMove, maxScore, depthLeft, CUT_NODE);
             unlockTranspositionEntryWhite(boardHash);
 
 
@@ -122,12 +133,19 @@ int alphaBetaMax(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
     for (i = 0; i < numDeferred; i++) {
         currentMove = deferredMoves[i];
         nextBoard = moveWhite(board, currentMove);
+        
         score = alphaBetaMin(nextBoard, alpha, beta, depthLeft - 1, historyArray);
+
+        if(score > maxScore) {
+        	maxScore = score;
+        	bestMove = currentMove;
+        }
 
         if (alpha < score) {
             alpha = score;
             bestMove = currentMove;
         }
+
         if (beta <= alpha) {
             if (entry.type != -1) {
                 lockTranspositionEntryWhite(entry.hash);
@@ -136,9 +154,9 @@ int alphaBetaMax(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
             }
             lockTranspositionEntryWhite(boardHash);
             if (alpha == WHITE_WIN)
-                addWhiteEntry(&board, currentMove, alpha, depthLeft, PV_NODE);
+                addWhiteEntry(&board, currentMove, maxScore, depthLeft, PV_NODE);
             else
-                addWhiteEntry(&board, currentMove, alpha, depthLeft, CUT_NODE);
+                addWhiteEntry(&board, currentMove, maxScore, depthLeft, CUT_NODE);
             unlockTranspositionEntryWhite(boardHash);
 
 
@@ -153,7 +171,7 @@ int alphaBetaMax(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
         unlockTranspositionEntryWhite(entry.hash);
     }
     lockTranspositionEntryWhite(boardHash);
-    addWhiteEntry(&board, bestMove, alpha, depthLeft, PV_NODE);
+    addWhiteEntry(&board, bestMove, maxScore, depthLeft, PV_NODE);
     unlockTranspositionEntryWhite(boardHash);
 
 
@@ -172,7 +190,7 @@ int alphaBetaMin(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
     int score = ALPHA_MIN;
     int movesNumber = 0;
 
-    beta = BETA_MAX;
+    int minScore = BETA_MAX;
 
     if(isDraw(&historyArray, board)) {
         return 0;
@@ -194,17 +212,21 @@ int alphaBetaMin(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
     //Cerco nella trasposition Table
     Entry entry = getBlackTrasposition(&board, &bestMove, &score);
 
+    int entryValid = (entry.type != -1) &&
+					 ((GET_CELL_STATE(board.Board, START_ROW(bestMove), START_COLUMN(bestMove))) == BLACK) &&
+					 ((GET_CELL_STATE(board.Board, TARGET_ROW(bestMove), TARGET_COLUMN(bestMove))) == EMPTY);
+    
     // TODO: condizione reinserita (controllare)
     //trovato un exact value con depthLeft>
-    if(entry.type == PV_NODE && entry.deepLeft >= depthLeft) {
+    if(entryValid && entry.type == PV_NODE && entry.deepLeft >= depthLeft) {
         return score;
     }
 
     ////trovato un cut value con depthLeft>
-    if(entry.type == CUT_NODE && entry.deepLeft >= depthLeft)
-        beta = score;
+    if(entryValid && entry.type == CUT_NODE && entry.deepLeft >= depthLeft)
+        minScore = score;
     //controllo se tagliare
-    if (alpha >= beta)
+    if (alpha >= minScore)
         return alpha;
 
 
@@ -218,7 +240,7 @@ int alphaBetaMin(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
 
     movesNumber = getPossibleMovesBlack(board, movesArr);
 
-    if (entry.type != -1) {    // Put first
+    if (entryValid && entry.type != -1) {    // Put first
         for(i = 0; i < movesNumber; i++) {
             if(movesArr[i] == bestMove) {
                 movesArr[i] = movesArr[0];
@@ -228,7 +250,7 @@ int alphaBetaMin(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
     }
 
     if(depthLeft > 1) {
-        if(entry.type != -1)
+        if(entryValid && entry.type != -1)
             sortMovesArrayBlack(&board, &(movesArr[1]), movesNumber - 1);
         else
             sortMovesArrayBlack(&board, movesArr, movesNumber);
@@ -250,6 +272,12 @@ int alphaBetaMin(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
         nextBoard = moveBlack(board, currentMove);
 
         score = alphaBetaMax(nextBoard, alpha, beta, depthLeft - 1, historyArray);
+
+        if(score < minScore) {
+        	minScore = score;
+        	bestMove = currentMove;
+        }
+
         if (beta > score) {
             beta = score;
             bestMove = currentMove;
@@ -262,9 +290,9 @@ int alphaBetaMin(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
             }
             lockTranspositionEntryBlack(boardHash);
             if (beta == BLACK_WIN)
-                addBlackEntry(&board, currentMove, beta, depthLeft, PV_NODE);
+                addBlackEntry(&board, currentMove, minScore, depthLeft, PV_NODE);
             else
-                addBlackEntry(&board, currentMove, beta, depthLeft, CUT_NODE);
+                addBlackEntry(&board, currentMove, minScore, depthLeft, CUT_NODE);
             unlockTranspositionEntryBlack(boardHash);
 
 
@@ -279,7 +307,13 @@ int alphaBetaMin(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
     for (i = 0; i < numDeferred; i++) {
         currentMove = deferredMoves[i];
         nextBoard = moveBlack(board, currentMove);
+        
         score = alphaBetaMax(nextBoard, alpha, beta, depthLeft - 1, historyArray);
+
+        if(score < minScore) {
+        	minScore = score;
+        	bestMove = currentMove;
+        }
 
         if (beta > score) {
             beta = score;
@@ -293,9 +327,9 @@ int alphaBetaMin(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
             }
             lockTranspositionEntryBlack(boardHash);
             if (beta == BLACK_WIN)
-                addBlackEntry(&board, currentMove, beta, depthLeft, PV_NODE);
+                addBlackEntry(&board, currentMove, minScore, depthLeft, PV_NODE);
             else
-                addBlackEntry(&board, currentMove, beta, depthLeft, CUT_NODE);
+                addBlackEntry(&board, currentMove, minScore, depthLeft, CUT_NODE);
             unlockTranspositionEntryBlack(boardHash);
 
 
@@ -310,7 +344,7 @@ int alphaBetaMin(BoardState board, int alpha, int beta, int depthLeft, HistoryAr
         unlockTranspositionEntryBlack(entry.hash);
     }
     lockTranspositionEntryBlack(boardHash);
-    addBlackEntry(&board, bestMove, beta, depthLeft, PV_NODE);
+    addBlackEntry(&board, bestMove, minScore, depthLeft, PV_NODE);
     unlockTranspositionEntryBlack(boardHash);
 
     return beta;
