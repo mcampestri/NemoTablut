@@ -1,18 +1,12 @@
 # NemoTablut
 
-Compilazione:
-
-`cd NemoTablut-master
-gcc ./NemoTablut/*.c -o Nemo -mcmodel=medium -O3 -pthread -w`
+## Build ##
+`gcc ./NemoTablut/*.c -o Nemo -mcmodel=medium -O3 -pthread -w`
 
 
+## Execution
+`./Nemo <color> <seconds> <threads>`
 
-Esecuzione:
-
-./Nemo black/white
-
-Accetta altri due argomenti per l'esecuzione, nell'ordine:
-
-  - Numero di secondi del timer (default: 60 secondi)
-  
-  - Numero di thread (default: 2)
+  - `<color>`: black/white
+  - `<seconds>`: number of seconds granted to compute the next move (default: 60 seconds)
+  - `<threads>`: number of threads (default: 2)
