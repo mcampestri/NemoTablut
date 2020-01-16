@@ -9,5 +9,5 @@
 `./Nemo <color> <seconds> <threads>`
 
   - `<color>`: black/white
-  - `<seconds>`: number of seconds granted to compute the next move (default: 60 seconds)
+  - `<seconds>`: number of seconds given to compute the next move (default: 60 seconds)
   - `<threads>`: number of threads (default: 2)
