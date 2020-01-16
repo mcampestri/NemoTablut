@@ -2,9 +2,8 @@
 
 Compilazione:
 
-cd NemoTablut-master
-
-gcc ./NemoTablut/*.c -o Nemo -mcmodel=medium -O3 -pthread -w
+`cd NemoTablut-master
+gcc ./NemoTablut/*.c -o Nemo -mcmodel=medium -O3 -pthread -w`
 
 
 
