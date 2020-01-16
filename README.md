@@ -1,11 +1,11 @@
 # NemoTablut
 
-## Build ##
+### Build
 `gcc ./NemoTablut/*.c -o Nemo -mcmodel=medium -O3 -pthread -w`
 
 <br/>
 
-## Execution
+### Execution
 `./Nemo <color> <seconds> <threads>`
 
   - `<color>`: black/white
